@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!--
+    ============================================================
+    Gurbani Learning Flash Cards
+    A free, printable flash card app for children to learn
+    Gurbani words. Works fully offline — no backend required.
+    ============================================================
+  -->
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Free printable Gurbani learning flash cards for children. Learn Punjabi / Gurmukhi words from Gurbani with illustrations." />
+  <meta name="theme-color" content="#1E3A5F" />
+
+  <!-- Open Graph (for sharing) -->
+  <meta property="og:title" content="Gurbani Learning Flash Cards" />
+  <meta property="og:description" content="Free printable flash cards to help children learn Gurbani words." />
+  <meta property="og:type" content="website" />
+
+  <title>Gurbani Learning Flash Cards</title>
+
+  <!-- Preconnect for Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+
+  <!-- ══════════════════════════════════════════════════════
+       HEADER
+       Sticky top bar with title and controls
+  ══════════════════════════════════════════════════════════ -->
+  <header id="app-header" role="banner">
+    <div class="header-inner">
+
+      <!-- Title -->
+      <div class="header-title-row">
+        <span class="header-khanda" aria-hidden="true">☬</span>
+        <div>
+          <h1 class="header-title">
+            <span>Gurbani</span> Learning Cards
+          </h1>
+          <p class="header-subtitle">Free flash cards for children</p>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="controls-bar print-hide" role="toolbar" aria-label="Card controls">
+
+        <!-- Toggle hide/show meanings -->
+        <button
+          id="btn-meanings"
+          class="btn btn-secondary"
+          title="Hide or show the English meanings on cards"
+          aria-pressed="false"
+        >
+          👁️ Hide Meanings
+        </button>
+
+        <!-- Toggle Template (New) -->
+        <button
+          id="btn-template"
+          class="btn btn-secondary"
+          title="Switch card layout design"
+        >
+          🎨 Design
+        </button>
+
+        <!-- Shuffle cards -->
+        <button
+          id="btn-shuffle"
+          class="btn btn-secondary"
+          title="Shuffle the cards into a random order"
+          aria-pressed="false"
+        >
+          🔀 Shuffle
+        </button>
+
+        <!-- Download as PDF -->
+        <button
+          id="btn-pdf"
+          class="btn btn-secondary"
+          title="Download as PDF via the browser print dialog"
+        >
+          💾 Save PDF
+        </button>
+
+        <!-- Print -->
+        <button
+          id="btn-print"
+          class="btn btn-primary"
+          title="Print all flash cards"
+        >
+          🖨️ Print Cards
+        </button>
+
+      </div>
+    </div>
+  </header>
+
+  <!-- ══════════════════════════════════════════════════════
+       STATS BAR
+       Shows card count
+  ══════════════════════════════════════════════════════════ -->
+  <div id="stats-bar" class="print-hide" role="status" aria-live="polite">
+    <p class="stats-text">
+      Showing <strong id="stats-count">0 cards</strong>
+    </p>
+    <p class="stats-text" style="font-size:0.7rem; color: var(--text-soft);">
+      Tap any card to flip it ↻
+    </p>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════
+       MAIN CONTENT
+  ══════════════════════════════════════════════════════════ -->
+  <main role="main">
+
+    <!-- Print-only header (hidden on screen, shown when printing) -->
+    <div class="print-header" aria-hidden="true">
+      <h1>☬ Gurbani Learning Flash Cards</h1>
+      <p>Cut out and use for learning Gurbani words at home • Free for the Sangat</p>
+    </div>
+
+    <!-- Loading state -->
+    <div id="loading-state" role="status" aria-label="Loading cards">
+      <div class="loading-spinner" aria-hidden="true"></div>
+      <p class="loading-text">Loading flash cards…</p>
+    </div>
+
+    <!-- Error state (shown if words.json fails to load) -->
+    <div id="error-state" role="alert" aria-live="assertive">
+      <div class="error-icon" aria-hidden="true">⚠️</div>
+      <h2 class="error-title">Could not load cards</h2>
+      <p class="error-message">
+        Please make sure <code>words.json</code> is in the same folder as
+        <code>index.html</code>, and open this app via a local server or
+        file:// in a browser that allows local file access.
+      </p>
+    </div>
+
+    <!-- Cards grid — populated by app.js -->
+    <section
+      id="cards-grid"
+      aria-label="Gurbani flash cards"
+    ></section>
+
+  </main>
+
+  <!-- ══════════════════════════════════════════════════════
+       FOOTER
+  ══════════════════════════════════════════════════════════ -->
+  <footer id="app-footer" class="print-hide" role="contentinfo">
+    <p>
+      ☬ Made with <strong>love</strong> for the Sangat &nbsp;•&nbsp;
+      Free to use, share &amp; print at home
+    </p>
+    <p style="margin-top: 4px; font-size: 0.65rem;">
+      ਵਾਹਿਗੁਰੂ ਜੀ ਕਾ ਖਾਲਸਾ, ਵਾਹਿਗੁਰੂ ਜੀ ਕੀ ਫ਼ਤਹਿ
+    </p>
+  </footer>
+
+  <!-- ══════════════════════════════════════════════════════
+       TOAST NOTIFICATION
+       Pops up briefly for user feedback
+  ══════════════════════════════════════════════════════════ -->
+  <div id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
+
+  <!-- App Script -->
+  <script src="app.js"></script>
+
+</body>
+</html>
