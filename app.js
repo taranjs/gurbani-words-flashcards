@@ -21,7 +21,19 @@ let allWords      = [];   // full original list
 let displayWords  = [];   // current display list (may be shuffled)
 let isMeaningsHidden = false;
 let isShuffled       = false;
+let isColorMode      = false;
 let currentDesign    = 0;     // 0=Default, 1=Design 2 (Text), 2=Design 3 (Visual)
+
+// ── Pastel Palette ─────────────────────────────────────────
+const PASTEL_COLORS = [
+  '#FFE5D9', // Soft Peach
+  '#FFF4E0', // Creamy Yellow
+  '#E0F4E8', // Mint Green
+  '#D9E8FC', // Baby Blue
+  '#F0E6EF', // Lavender
+  '#FDE2E4', // Pale Pink
+  '#E2F0CB', // Light Lime
+];
 
 // ── DOM references ─────────────────────────────────────────
 const cardsGrid     = document.getElementById('cards-grid');
@@ -84,6 +96,10 @@ function createCardElement(word, index) {
 
   // Staggered entrance animation delay
   wrapper.style.animationDelay = `${index * 60}ms`;
+
+  // Assign a unique pastel color based on index
+  const color = PASTEL_COLORS[index % PASTEL_COLORS.length];
+  wrapper.style.setProperty('--card-pastel', color);
 
   // Check if we are using the alternate template
   if (currentDesign === 1) {
@@ -347,6 +363,12 @@ function attachButtonListeners() {
     btnTemplate.addEventListener('click', toggleTemplate);
   }
 
+  // Colors Toggle button
+  const btnColors = document.getElementById('btn-colors');
+  if (btnColors) {
+    btnColors.addEventListener('click', toggleColorMode);
+  }
+
   // Flip all cards back before printing
   window.addEventListener('beforeprint', () => {
     document.querySelectorAll('.card-wrapper.flipped')
@@ -424,6 +446,20 @@ function toggleTemplate() {
   showToast(`🎨 Switched to ${names[currentDesign]}`);
 
   renderCards();
+}
+
+// ── Color mode toggle ──────────────────────────────────────
+function toggleColorMode() {
+  isColorMode = !isColorMode;
+  const btn = document.getElementById('btn-colors');
+
+  if (isColorMode) {
+    cardsGrid.classList.add('rainbow-mode');
+    btn.classList.add('active');
+  } else {
+    cardsGrid.classList.remove('rainbow-mode');
+    btn.classList.remove('active');
+  }
 }
 
 // ── Toggle meanings visibility ─────────────────────────────

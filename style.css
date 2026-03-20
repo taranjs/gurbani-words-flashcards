@@ -868,3 +868,23 @@ body:not(.show-meanings).hide-meanings .card-meaning-label {
   color: rgba(255,255,255,0.3);
   line-height: 1;
 }
+
+/* ============================================================
+   RAINBOW MODE (Pastel Colors)
+   ============================================================ */
+
+.rainbow-mode .card-front-alt {
+  background-color: var(--card-pastel) !important;
+  border-color: rgba(0,0,0,0.05);
+}
+
+/* Classic design overrides */
+.rainbow-mode .card-front {
+  background-color: var(--card-pastel) !important;
+  border-color: rgba(0,0,0,0.05);
+}
+
+.rainbow-mode .card-front-bottom {
+  background-color: transparent !important;
+  border-top-color: rgba(0,0,0,0.1);
+}
