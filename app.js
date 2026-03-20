@@ -22,6 +22,7 @@ let displayWords  = [];   // current display list (may be shuffled)
 let isMeaningsHidden = false;
 let isShuffled       = false;
 let isColorMode      = false;
+let currentDataFile  = 'words.json';
 let currentDesign    = 0;     // 0=Default, 1=Design 2 (Text), 2=Design 3 (Visual)
 
 // ── Pastel Palette ─────────────────────────────────────────
@@ -54,10 +55,10 @@ async function loadWords() {
   try {
     showLoading(true);
 
-    const response = await fetch('words.json');
+    const response = await fetch(currentDataFile);
 
     if (!response.ok) {
-      throw new Error(`HTTP ${response.status}: Could not load words.json`);
+      throw new Error(`HTTP ${response.status}: Could not load ${currentDataFile}`);
     }
 
     allWords     = await response.json();
@@ -95,7 +96,8 @@ function createCardElement(word, index) {
   wrapper.className = 'card-wrapper';
 
   // Staggered entrance animation delay
-  wrapper.style.animationDelay = `${index * 60}ms`;
+  // Cap the delay at 1200ms so large lists (like 365 words) don't stay hidden too long
+  wrapper.style.animationDelay = `${Math.min(index * 60, 1200)}ms`;
 
   // Assign a unique pastel color based on index
   const color = PASTEL_COLORS[index % PASTEL_COLORS.length];
@@ -357,6 +359,12 @@ function attachButtonListeners() {
     btnPdf.addEventListener('click', downloadPdf);
   }
 
+  // Dataset Toggle button
+  const btnDataset = document.getElementById('btn-dataset');
+  if (btnDataset) {
+    btnDataset.addEventListener('click', toggleDataset);
+  }
+
   // Template Toggle button
   const btnTemplate = document.getElementById('btn-template');
   if (btnTemplate) {
@@ -434,6 +442,25 @@ function toggleShuffle() {
 
   renderCards();
   updateStats();
+}
+
+// ── Dataset toggle ─────────────────────────────────────────
+function toggleDataset() {
+  const btn = document.getElementById('btn-dataset');
+  
+  if (currentDataFile === 'words.json') {
+    currentDataFile = 'words-365.json';
+    if (btn) btn.innerHTML = '📚 List: 365';
+    if (btn) btn.classList.add('active');
+    showToast('📚 Loading 365 Words list...');
+  } else {
+    currentDataFile = 'words.json';
+    if (btn) btn.innerHTML = '📚 List: Basic';
+    if (btn) btn.classList.remove('active');
+    showToast('📚 Loading Basic Words list...');
+  }
+
+  loadWords();
 }
 
 // ── Template toggle ────────────────────────────────────────
