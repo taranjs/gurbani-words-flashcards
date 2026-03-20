@@ -24,6 +24,7 @@ let isShuffled       = false;
 let isColorMode      = false;
 let currentDataFile  = 'words.json';
 let currentDesign    = 0;     // 0=Default, 1=Design 2 (Text), 2=Design 3 (Visual)
+let searchQuery      = '';
 
 // ── Pastel Palette ─────────────────────────────────────────
 const PASTEL_COLORS = [
@@ -62,21 +63,45 @@ async function loadWords() {
     }
 
     allWords     = await response.json();
-    displayWords = [...allWords];
+    // displayWords is now set via applyFiltersAndSort()
 
     if (!Array.isArray(allWords) || allWords.length === 0) {
       throw new Error('words.json is empty or not a valid array.');
     }
 
     showLoading(false);
-    renderCards();
-    updateStats();
+    applyFiltersAndSort();
 
   } catch (err) {
     console.error('Failed to load words:', err);
     showLoading(false);
     showError(err.message);
   }
+}
+
+// ── Apply Filters & Shuffle ────────────────────────────────
+function applyFiltersAndSort() {
+  // 1. Start with all words
+  let result = [...allWords];
+
+  // 2. Filter by search query
+  if (searchQuery) {
+    const q = searchQuery.toLowerCase().trim();
+    result = result.filter(word => 
+      (word.word_gurmukhi && word.word_gurmukhi.toLowerCase().includes(q)) ||
+      (word.transliteration && word.transliteration.toLowerCase().includes(q)) ||
+      (word.meaning && word.meaning.toLowerCase().includes(q))
+    );
+  }
+
+  // 3. Shuffle if enabled
+  if (isShuffled) {
+    shuffleArray(result);
+  }
+
+  displayWords = result;
+  renderCards();
+  updateStats();
 }
 
 // ── Render all cards ───────────────────────────────────────
@@ -336,6 +361,15 @@ function updateStats() {
 function attachButtonListeners() {
 
   // Print button
+  // Search input
+  const searchInput = document.getElementById('search-input');
+  if (searchInput) {
+    searchInput.addEventListener('input', (e) => {
+      searchQuery = e.target.value;
+      applyFiltersAndSort();
+    });
+  }
+
   const btnPrint = document.getElementById('btn-print');
   if (btnPrint) {
     btnPrint.addEventListener('click', triggerPrint);
@@ -429,19 +463,16 @@ function toggleShuffle() {
   const btn = document.getElementById('btn-shuffle');
 
   if (isShuffled) {
-    displayWords = shuffleArray([...allWords]);
     btn.classList.add('active');
     btn.innerHTML = '🔀 Shuffled';
     showToast('🔀 Cards shuffled!');
   } else {
-    displayWords = [...allWords];
     btn.classList.remove('active');
     btn.innerHTML = '🔀 Shuffle';
     showToast('↩ Cards reset to original order');
   }
 
-  renderCards();
-  updateStats();
+  applyFiltersAndSort();
 }
 
 // ── Dataset toggle ─────────────────────────────────────────
