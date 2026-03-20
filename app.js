@@ -21,7 +21,7 @@ let allWords      = [];   // full original list
 let displayWords  = [];   // current display list (may be shuffled)
 let isMeaningsHidden = false;
 let isShuffled       = false;
-let isAltTemplate    = false;
+let currentDesign    = 0;     // 0=Default, 1=Design 2 (Text), 2=Design 3 (Visual)
 
 // ── DOM references ─────────────────────────────────────────
 const cardsGrid     = document.getElementById('cards-grid');
@@ -86,10 +86,64 @@ function createCardElement(word, index) {
   wrapper.style.animationDelay = `${index * 60}ms`;
 
   // Check if we are using the alternate template
-  if (isAltTemplate) {
+  if (currentDesign === 1) {
     return createAltCardElement(wrapper, word);
   }
+  // Check if we are using the classic template (Old Default)
+  if (currentDesign === 2) {
+    return createClassicCardElement(wrapper, word);
+  }
 
+  // ── DEFAULT DESIGN (Visual / New) ────────────────────
+  // Front: Large Text (Same as Design 2)
+  // ── Front Face ───────────────────────────────────────
+  const front = document.createElement('div');
+  front.className = 'card-face card-front-alt';
+
+  front.innerHTML = `
+    <div class="card-alt-header">Gurbani Learning Cards</div>
+    
+    <div class="card-alt-center">
+      <div class="card-gurmukhi-large" lang="pa">${escapeHtml(word.word_gurmukhi)}</div>
+      <div class="card-transliteration-large">${escapeHtml(word.transliteration || '')}</div>
+    </div>
+
+    <div class="card-alt-footer">www.365GurbaniWords.com</div>
+    <div class="card-flip-hint">tap to flip ↻</div>
+  `;
+
+  // Back: Meaning (Fixed height) + Image (Margin) + No Footer
+  const back = document.createElement('div');
+  back.className = 'card-face card-back';
+
+  back.innerHTML = `
+    <div class="card-back-accent"></div>
+    
+    <!-- Header with fixed min-height for 2 lines of text consistency -->
+    <div class="card-back-header" style="min-height: 5.5rem; justify-content: center; padding-bottom: 0;">
+      <div class="card-back-meaning" style="font-size: 1.4rem; color: var(--gold-light); line-height: 1.2;">${escapeHtml(word.meaning)}</div>
+    </div>
+
+    <div class="card-back-body card-back-simple-body">
+      ${buildImageHtml(word)}
+    </div>
+    
+    <!-- No footer/icon requested -->
+  `;
+
+  const inner = document.createElement('div');
+  inner.className = 'card-inner';
+  inner.appendChild(front);
+  inner.appendChild(back);
+
+  wrapper.appendChild(inner);
+  attachFlipEvents(wrapper);
+
+  return wrapper;
+}
+
+// ── Create Classic Card (Old Default) ──────────────────────
+function createClassicCardElement(wrapper, word) {
   // ── Front Face ───────────────────────────────────────
   const front = document.createElement('div');
   front.className = 'card-face card-front';
@@ -362,11 +416,12 @@ function toggleShuffle() {
 
 // ── Template toggle ────────────────────────────────────────
 function toggleTemplate() {
-  isAltTemplate = !isAltTemplate;
+  currentDesign = (currentDesign + 1) % 3;
   const btn = document.getElementById('btn-template');
+  const names = ['Visual Design (Default)', 'Text Design', 'Classic Design'];
 
-  btn.classList.toggle('active', isAltTemplate);
-  showToast(isAltTemplate ? '🎨 Switched to Design 2' : '🎨 Switched to Design 1');
+  btn.classList.toggle('active', currentDesign !== 0);
+  showToast(`🎨 Switched to ${names[currentDesign]}`);
 
   renderCards();
 }
