@@ -1051,6 +1051,17 @@ body.hide-images .card-back .card-back-meaning {
   margin-top: 24px;
 }
 
+/* Fix visibility of Cancel button (btn-secondary) on white modal background */
+.modal-actions .btn-secondary {
+  color: var(--navy);
+  border-color: var(--navy-mid);
+  background: transparent;
+}
+
+.modal-actions .btn-secondary:hover {
+  background: var(--navy-soft);
+}
+
 /* ── Game Board ───────────────────────────────────────────── */
 #game-board {
   width: 100%;
