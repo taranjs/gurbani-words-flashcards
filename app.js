@@ -489,13 +489,20 @@ function toggleDataset() {
   if (currentDataFile === 'words.json') {
     currentDataFile = 'words-365.json';
     if (btn) btn.innerHTML = '📚 List: 365';
-    if (btn) btn.classList.add('active');
     showToast('📚 Loading 365 Words list...');
+  } else if (currentDataFile === 'words-365.json') {
+    currentDataFile = 'words-treasure.json';
+    if (btn) btn.innerHTML = '📚 List: Treasure';
+    showToast('📚 Loading Treasure Words list...');
   } else {
     currentDataFile = 'words.json';
     if (btn) btn.innerHTML = '📚 List: Basic';
-    if (btn) btn.classList.remove('active');
     showToast('📚 Loading Basic Words list...');
+  }
+
+  // Toggle active class if we are not on the default basic list
+  if (btn) {
+    btn.classList.toggle('active', currentDataFile !== 'words.json');
   }
 
   loadWords();
