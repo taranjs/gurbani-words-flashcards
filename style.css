@@ -30,6 +30,7 @@
   --radius-btn:     50px;
   --font-display:   'Baloo 2', cursive;
   --font-body:      'Hind', sans-serif;
+  --font-game:      'Baloo 2', cursive;
   --transition:     0.35s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -978,3 +979,176 @@ body.hide-images .card-back-header-visual {
 body.hide-images .card-back .card-back-meaning {
   font-size: clamp(1.5rem, 4vw, 2rem);
 }
+
+/* ============================================================
+   MEMORY GAME UI
+   ============================================================ */
+
+.hidden { display: none !important; }
+
+/* ── Modal Overlay ────────────────────────────────────────── */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(30, 58, 95, 0.85);
+  backdrop-filter: blur(5px);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+.modal-content {
+  background: var(--white);
+  padding: 24px;
+  border-radius: 20px;
+  width: 100%;
+  max-width: 400px;
+  box-shadow: var(--shadow-lift);
+  border: 4px solid var(--saffron-light);
+  text-align: center;
+}
+
+.game-setup-content h2 {
+  font-family: var(--font-display);
+  color: var(--navy);
+  margin-bottom: 20px;
+}
+
+.form-group { margin-bottom: 20px; text-align: left; }
+.form-group label {
+  display: block;
+  font-family: var(--font-body);
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: var(--text-mid);
+}
+
+.game-select {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  border: 2px solid var(--parchment-mid);
+  font-family: var(--font-body);
+  font-size: 1rem;
+}
+
+.input-hint {
+  font-size: 0.75rem;
+  color: #d32f2f; /* Error red */
+  margin-top: 4px;
+  min-height: 1.2em;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 24px;
+}
+
+/* ── Game Board ───────────────────────────────────────────── */
+#game-board {
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.game-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  background: rgba(255,255,255,0.5);
+  padding: 8px 16px;
+  border-radius: 50px;
+}
+
+.game-score {
+  font-family: var(--font-display);
+  font-weight: 700;
+  color: var(--navy);
+}
+
+.game-grid {
+  display: grid;
+  gap: 8px;
+  justify-content: center;
+  width: 100%;
+}
+
+/* Grid Columns controlled by JS style attribute, or helper classes */
+.game-grid.grid-3 { grid-template-columns: repeat(3, 1fr); }
+.game-grid.grid-4 { grid-template-columns: repeat(4, 1fr); }
+.game-grid.grid-5 { grid-template-columns: repeat(5, 1fr); }
+.game-grid.grid-6 { grid-template-columns: repeat(6, 1fr); }
+
+/* ── Memory Card ──────────────────────────────────────────── */
+.memory-card {
+  aspect-ratio: 1 / 1;
+  background-color: var(--white);
+  border: 2px solid var(--saffron-light);
+  border-radius: 12px;
+  cursor: pointer;
+  perspective: 1000px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+  position: relative;
+  transition: transform 0.1s;
+}
+
+.memory-card:active { transform: scale(0.95); }
+.memory-card.matched { visibility: hidden; pointer-events: none; transition: visibility 0s 0.3s; }
+
+.memory-card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  text-align: center;
+  transition: transform 0.4s;
+  transform-style: preserve-3d;
+}
+
+.memory-card.flipped .memory-card-inner { transform: rotateY(180deg); }
+
+/* Front and Back of Memory Card */
+.mem-face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+}
+
+.mem-front {
+  background: linear-gradient(135deg, var(--saffron), var(--gold));
+  color: white;
+  font-size: 2rem;
+}
+
+.mem-back {
+  background: var(--white);
+  transform: rotateY(180deg);
+  border: 2px solid var(--navy);
+  color: var(--navy);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(0.8rem, 2.5vw, 1.2rem);
+  padding: 2px;
+  overflow: hidden;
+  word-wrap: break-word;
+}
+
+/* Zoom Modal specific */
+.match-content { max-width: 320px; border-color: var(--gold); }
+#match-card-container .card-wrapper { aspect-ratio: 3/4; margin-bottom: 16px; width: 100%; cursor: default; }
+#match-card-container .card-wrapper:hover { transform: none; }

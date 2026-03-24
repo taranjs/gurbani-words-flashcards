@@ -27,6 +27,18 @@ let currentDataFile  = 'words.json';
 let currentDesign    = 0;     // 0=Default, 1=Design 2 (Text), 2=Design 3 (Visual)
 let searchQuery      = '';
 
+// ── Game State ─────────────────────────────────────────────
+let gameState = {
+  active: false,
+  gridSize: 3,
+  mode: 1,
+  cards: [],
+  flippedCards: [],
+  matchedPairs: 0,
+  totalPairs: 0,
+  locked: false
+};
+
 // ── Pastel Palette ─────────────────────────────────────────
 const PASTEL_COLORS = [
   '#FFE5D9', // Soft Peach
@@ -409,6 +421,28 @@ function attachButtonListeners() {
     btnImages.addEventListener('click', toggleImages);
   }
 
+  // Game Button (Opens Setup)
+  const btnGame = document.getElementById('btn-game');
+  if (btnGame) {
+    btnGame.addEventListener('click', openGameSetup);
+  }
+
+  // Game Setup Actions
+  document.getElementById('game-grid-size')?.addEventListener('change', checkGameSizeAvailability);
+  document.getElementById('btn-start-game')?.addEventListener('click', startGame);
+  document.getElementById('btn-cancel-game')?.addEventListener('click', closeGameSetup);
+  document.getElementById('btn-exit-game')?.addEventListener('click', exitGame);
+  
+  // Match Modal Close
+  document.getElementById('btn-close-match')?.addEventListener('click', () => {
+    document.getElementById('game-match-modal').classList.add('hidden');
+    // If game over?
+    if (gameState.matchedPairs === gameState.totalPairs) {
+      showToast('🎉 You won! Starting new game...');
+      setTimeout(() => openGameSetup(), 1500);
+    }
+  });
+
   // Flip all cards back before printing
   window.addEventListener('beforeprint', () => {
     document.querySelectorAll('.card-wrapper.flipped')
@@ -609,4 +643,250 @@ function escapeHtml(str) {
     .replace(/>/g,  '&gt;')
     .replace(/"/g,  '&quot;')
     .replace(/'/g,  '&#39;');
+}
+
+// ============================================================
+// MEMORY GAME LOGIC
+// ============================================================
+
+// ── Open Setup Modal ───────────────────────────────────────
+function openGameSetup() {
+  const modal = document.getElementById('game-setup-modal');
+  modal.classList.remove('hidden');
+  
+  // Reset dropdown to default 3
+  const select = document.getElementById('game-grid-size');
+  select.value = "3";
+  
+  checkGameSizeAvailability();
+}
+
+function closeGameSetup() {
+  document.getElementById('game-setup-modal').classList.add('hidden');
+}
+
+// ── Validate Available Words ───────────────────────────────
+function checkGameSizeAvailability() {
+  const size = parseInt(document.getElementById('game-grid-size').value);
+  const totalCells = size * size;
+  // For odd grids (9, 25), we use 1 center logo, so pairs = (total-1)/2
+  // For even grids (16, 36), pairs = total/2
+  const pairsNeeded = Math.floor(totalCells / 2);
+  
+  const startBtn = document.getElementById('btn-start-game');
+  const warning = document.getElementById('game-size-warning');
+  
+  // Check availability based on allWords (full loaded list)
+  if (allWords.length < pairsNeeded) {
+    startBtn.disabled = true;
+    warning.textContent = `Not enough words! Need ${pairsNeeded}, have ${allWords.length}.`;
+  } else {
+    startBtn.disabled = false;
+    warning.textContent = "";
+  }
+}
+
+// ── Start Game ─────────────────────────────────────────────
+function startGame() {
+  closeGameSetup();
+  
+  const size = parseInt(document.getElementById('game-grid-size').value);
+  const mode = parseInt(document.getElementById('game-mode').value);
+  
+  gameState = {
+    active: true,
+    gridSize: size,
+    mode: mode,
+    cards: [],
+    flippedCards: [],
+    matchedPairs: 0,
+    totalPairs: Math.floor((size * size) / 2),
+    locked: false
+  };
+
+  // Hide Main Grid, Show Game Board
+  document.getElementById('cards-grid').classList.add('hidden');
+  document.getElementById('stats-bar').classList.add('hidden');
+  document.getElementById('game-board').classList.remove('hidden');
+  document.getElementById('game-pairs-count').textContent = '0';
+
+  generateGameGrid();
+}
+
+// ── Generate Grid & Cards ──────────────────────────────────
+function generateGameGrid() {
+  const gridEl = document.getElementById('game-grid');
+  gridEl.innerHTML = '';
+  gridEl.className = `game-grid grid-${gameState.gridSize}`;
+
+  // 1. Select Random Words
+  // Shuffle all words first, then slice
+  const shuffledWords = [...allWords].sort(() => 0.5 - Math.random());
+  const selectedWords = shuffledWords.slice(0, gameState.totalPairs);
+
+  // 2. Create Pairs
+  let deck = [];
+  selectedWords.forEach(word => {
+    // Card A
+    deck.push({ 
+      id: word.word_gurmukhi, // Unique identifier for match
+      content: word.word_gurmukhi,
+      type: 'gurmukhi',
+      data: word 
+    });
+    
+    // Card B
+    if (gameState.mode === 1) {
+      // Mode 1: Match Gurmukhi to Gurmukhi
+      deck.push({ 
+        id: word.word_gurmukhi, 
+        content: word.word_gurmukhi, 
+        type: 'gurmukhi',
+        data: word 
+      });
+    } else {
+      // Mode 2: Match Gurmukhi to English Meaning
+      deck.push({ 
+        id: word.word_gurmukhi, 
+        content: word.meaning, 
+        type: 'english',
+        data: word 
+      });
+    }
+  });
+
+  // 3. Handle Odd Grid Center (e.g. 3x3=9, 5x5=25)
+  // We have 8 cards for 3x3, need 9th.
+  const totalCells = gameState.gridSize * gameState.gridSize;
+  if (totalCells % 2 !== 0) {
+    deck.push({ type: 'logo', id: 'logo' });
+  }
+
+  // 4. Shuffle Deck
+  deck.sort(() => 0.5 - Math.random());
+
+  // 5. If odd grid, ensure logo is in the exact center? 
+  // Usually standard shuffle is fine, but center looks nicer.
+  if (totalCells % 2 !== 0) {
+    // Find logo and swap with center index
+    const logoIndex = deck.findIndex(c => c.type === 'logo');
+    const centerIndex = Math.floor(totalCells / 2);
+    [deck[logoIndex], deck[centerIndex]] = [deck[centerIndex], deck[logoIndex]];
+  }
+
+  // 6. Render
+  deck.forEach((card, index) => {
+    const el = document.createElement('div');
+    el.className = 'memory-card';
+    el.dataset.index = index;
+
+    if (card.type === 'logo') {
+      el.classList.add('static-logo');
+      el.innerHTML = `
+        <div class="memory-card-inner">
+          <div class="mem-face" style="background:var(--navy); color:var(--white); font-size:1.5rem;">☬</div>
+        </div>`;
+    } else {
+      el.innerHTML = `
+        <div class="memory-card-inner">
+          <div class="mem-face mem-front">?</div>
+          <div class="mem-face mem-back" lang="${card.type === 'gurmukhi' ? 'pa' : 'en'}">
+            ${card.content}
+          </div>
+        </div>
+      `;
+      el.addEventListener('click', () => handleCardFlip(el, card));
+    }
+    gridEl.appendChild(el);
+  });
+}
+
+// ── Handle Flip ────────────────────────────────────────────
+function handleCardFlip(el, cardData) {
+  if (gameState.locked) return;
+  if (el.classList.contains('flipped')) return; // Already flipped
+  if (el.classList.contains('matched')) return; // Already matched
+
+  // Flip it
+  el.classList.add('flipped');
+  gameState.flippedCards.push({ element: el, data: cardData });
+
+  // Check if 2 cards are flipped
+  if (gameState.flippedCards.length === 2) {
+    gameState.locked = true;
+    checkForMatch();
+  }
+}
+
+// ── Check Match ────────────────────────────────────────────
+function checkForMatch() {
+  const [c1, c2] = gameState.flippedCards;
+  
+  // Match condition: Same ID (word key)
+  const isMatch = c1.data.id === c2.data.id;
+
+  if (isMatch) {
+    // MATCH FOUND
+    gameState.matchedPairs++;
+    document.getElementById('game-pairs-count').textContent = gameState.matchedPairs;
+    
+    // Visually mark matched
+    setTimeout(() => {
+      c1.element.classList.add('matched');
+      c2.element.classList.add('matched');
+      
+      // Show Zoom Modal
+      showMatchModal(c1.data.data); // pass the full word object
+      
+      // Reset
+      gameState.flippedCards = [];
+      gameState.locked = false;
+    }, 600);
+
+  } else {
+    // NO MATCH
+    setTimeout(() => {
+      c1.element.classList.remove('flipped');
+      c2.element.classList.remove('flipped');
+      gameState.flippedCards = [];
+      gameState.locked = false;
+    }, 1200);
+  }
+}
+
+// ── Show Match Modal ───────────────────────────────────────
+function showMatchModal(word) {
+  const container = document.getElementById('match-card-container');
+  container.innerHTML = '';
+  
+  // Reuse the existing createCardElement but force it to be flipped/visible
+  // We'll use the "Classic" design for the modal as it has the most info compactly
+  // Or we can use the current design. Let's use Classic for clarity of info.
+  
+  // Temporarily force design 2 (Classic) for this render
+  const savedDesign = currentDesign;
+  currentDesign = 2; 
+  const card = createCardElement(word, 0);
+  currentDesign = savedDesign; // Restore
+
+  // Force visual state to show "Back" (Meaning) immediately or handle flip?
+  // Logic: User matched them, so they know the word. Let's show the full card.
+  // We'll simulate a flip so they see the meaning side which has description + image
+  card.classList.add('flipped');
+  
+  container.appendChild(card);
+  
+  document.getElementById('game-match-modal').classList.remove('hidden');
+}
+
+// ── Exit Game ──────────────────────────────────────────────
+function exitGame() {
+  gameState.active = false;
+  // Hide Game, Show Main
+  document.getElementById('game-board').classList.add('hidden');
+  document.getElementById('cards-grid').classList.remove('hidden');
+  document.getElementById('stats-bar').classList.remove('hidden');
+  
+  // Re-render main list to ensure state is clean
+  renderCards();
 }
