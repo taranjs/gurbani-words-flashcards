@@ -22,6 +22,7 @@ let displayWords  = [];   // current display list (may be shuffled)
 let isMeaningsHidden = false;
 let isShuffled       = false;
 let isColorMode      = false;
+let isImageHidden    = false;
 let currentDataFile  = 'words.json';
 let currentDesign    = 0;     // 0=Default, 1=Design 2 (Text), 2=Design 3 (Visual)
 let searchQuery      = '';
@@ -163,8 +164,8 @@ function createCardElement(word, index) {
     <div class="card-back-accent"></div>
     
     <!-- Header with fixed min-height for 2 lines of text consistency -->
-    <div class="card-back-header" style="min-height: 5.5rem; justify-content: center; padding-bottom: 0;">
-      <div class="card-back-meaning" style="font-size: 1.4rem; color: var(--gold-light); line-height: 1.2;">${escapeHtml(word.meaning)}</div>
+    <div class="card-back-header card-back-header-visual">
+      <div class="card-back-meaning card-back-meaning-visual">${escapeHtml(word.meaning)}</div>
     </div>
 
     <div class="card-back-body card-back-simple-body">
@@ -294,10 +295,10 @@ function createAltCardElement(wrapper, word) {
     <div class="card-back-accent"></div>
     
     <div class="card-back-header">
-      <div class="card-back-meaning" style="font-size: 1.4rem; color: var(--gold-light);">${escapeHtml(word.meaning)}</div>
+      <div class="card-back-meaning card-back-meaning-alt">${escapeHtml(word.meaning)}</div>
     </div>
 
-    <div class="card-back-body" style="justify-content: flex-start;">
+    <div class="card-back-body card-back-body-alt">
       <!-- Image on back -->
       <div class="card-back-alt-image">
         ${buildImageHtml(word)}
@@ -411,6 +412,12 @@ function attachButtonListeners() {
     btnColors.addEventListener('click', toggleColorMode);
   }
 
+  // Image Visibility Toggle button
+  const btnImages = document.getElementById('btn-images');
+  if (btnImages) {
+    btnImages.addEventListener('click', toggleImages);
+  }
+
   // Flip all cards back before printing
   window.addEventListener('beforeprint', () => {
     document.querySelectorAll('.card-wrapper.flipped')
@@ -517,6 +524,25 @@ function toggleColorMode() {
   } else {
     cardsGrid.classList.remove('rainbow-mode');
     btn.classList.remove('active');
+  }
+}
+
+// ── Toggle image visibility ────────────────────────────────
+function toggleImages() {
+  isImageHidden = !isImageHidden;
+  const btn = document.getElementById('btn-images');
+  const body = document.body;
+
+  if (isImageHidden) {
+    body.classList.add('hide-images');
+    btn.classList.add('active');
+    btn.innerHTML = '🖼️ Show Images';
+    showToast('🖼️ Images hidden');
+  } else {
+    body.classList.remove('hide-images');
+    btn.classList.remove('active');
+    btn.innerHTML = '🖼️ Hide Images';
+    showToast('🖼️ Images visible');
   }
 }
 

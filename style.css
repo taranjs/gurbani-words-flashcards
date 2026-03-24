@@ -862,6 +862,23 @@ body:not(.show-meanings).hide-meanings .card-meaning-label {
   object-fit: contain;
 }
 
+/* ── Specific styles for Alt/Visual designs ────────────── */
+.card-back-header-visual {
+  min-height: 5.5rem;
+  justify-content: center;
+  padding-bottom: 0;
+}
+.card-back-meaning-visual {
+  font-size: 1.4rem;
+  color: var(--gold-light);
+  line-height: 1.2;
+}
+.card-back-meaning-alt {
+  font-size: 1.4rem;
+  color: var(--gold-light);
+}
+.card-back-body-alt { justify-content: flex-start; }
+
 /* ── Simple Back (Design 3) ──────────────────────────────── */
 .card-back-simple-body {
   flex: 1;
@@ -905,4 +922,32 @@ body:not(.show-meanings).hide-meanings .card-meaning-label {
 .rainbow-mode .card-front-bottom {
   background-color: transparent !important;
   border-top-color: rgba(0,0,0,0.1);
+}
+
+/* ============================================================
+   HIDE IMAGES MODE
+   ============================================================ */
+
+/* Hide image/description containers on the back of the card */
+body.hide-images .card-back-body,
+body.hide-images .card-back-footer {
+  display: none;
+}
+
+/* Make the header fill the entire back of the card and center the meaning */
+body.hide-images .card-back-header {
+  flex: 1;
+  justify-content: center;
+  border-bottom: none;
+}
+
+/* Override specific visual design header styles */
+body.hide-images .card-back-header-visual {
+  min-height: auto;
+  padding-bottom: 18px; /* Restore padding for balance */
+}
+
+/* Increase font size of meaning when it's the only thing on the card */
+body.hide-images .card-back .card-back-meaning {
+  font-size: clamp(1.5rem, 4vw, 2rem);
 }
