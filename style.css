@@ -639,7 +639,6 @@ body:not(.show-meanings).hide-meanings .card-meaning-label {
   /* Hide all UI chrome */
   #app-header,
   #stats-bar,
-  #app-footer,
   #toast,
   .card-flip-hint,
   .card-back-tap,
@@ -757,6 +756,16 @@ body:not(.show-meanings).hide-meanings .card-meaning-label {
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
     color-adjust: exact;
+  }
+
+  /* Print Footer */
+  #app-footer {
+    display: block !important;
+    text-align: center;
+    margin-top: 10mm;
+    padding-top: 4mm;
+    border-top: 1px solid #ccc;
+    font-size: 9pt;
   }
 }
 
