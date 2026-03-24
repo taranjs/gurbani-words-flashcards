@@ -181,6 +181,8 @@ function createCardElement(word, index) {
   inner.appendChild(back);
 
   wrapper.appendChild(inner);
+  
+  wrapper.setAttribute('aria-label', `Flash card: ${word.word_gurmukhi} — ${word.meaning}`);
   attachFlipEvents(wrapper);
 
   return wrapper;
@@ -249,22 +251,9 @@ function createClassicCardElement(wrapper, word) {
 
   wrapper.appendChild(inner);
 
-  // ── Flip interaction ──────────────────────────────────
-  wrapper.addEventListener('click', () => {
-    wrapper.classList.toggle('flipped');
-  });
-
-  // Keyboard accessibility
-  wrapper.setAttribute('tabindex', '0');
-  wrapper.setAttribute('role', 'button');
+  // Accessibility specific to content
   wrapper.setAttribute('aria-label', `Flash card: ${word.word_gurmukhi} — ${word.meaning}`);
-
-  wrapper.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      wrapper.classList.toggle('flipped');
-    }
-  });
+  attachFlipEvents(wrapper);
 
   return wrapper;
 }
@@ -318,6 +307,8 @@ function createAltCardElement(wrapper, word) {
   inner.appendChild(back);
 
   wrapper.appendChild(inner);
+  
+  wrapper.setAttribute('aria-label', `Flash card: ${word.word_gurmukhi} — ${word.meaning}`);
   attachFlipEvents(wrapper); // Helper to attach events
 
   return wrapper;
