@@ -679,40 +679,58 @@ body:not(.show-meanings).hide-meanings .card-meaning-label {
     color: #888;
   }
 
-  /* 2-column grid */
+  /* Single column of card pairs */
   #cards-grid {
     display: grid !important;
-    grid-template-columns: repeat(2, 1fr) !important;
-    gap: 8mm !important;
+    grid-template-columns: 1fr !important;
+    gap: 10mm !important;
     margin-top: 0 !important;
   }
 
-  /* Card size for print: 3x4 inch in mm ≈ 76mm x 101mm */
+  /* Wrapper for the pair, disables 3D */
   .card-wrapper {
-    width: 76mm;
-    height: 101mm;
-    max-width: 76mm;
+    width: auto;
+    height: auto;
+    max-width: none;
+    perspective: none;
     aspect-ratio: unset;
     break-inside: avoid;
     page-break-inside: avoid;
     animation: none !important;
   }
 
-  /* Show FRONT only when printing */
+  /* This becomes a flex container for the front and back faces */
   .card-inner {
     transform: none !important;
     transition: none !important;
+    position: static;
+    transform-style: flat;
+    display: flex;
+    gap: 5mm;
+    width: 100%;
+    height: auto;
   }
 
-  .card-back {
-    display: none !important;
+  /* Make both faces visible, static, and sized correctly */
+  .card-face {
+    display: flex !important;
+    position: static !important;
+    transform: none !important;
+    backface-visibility: visible !important;
+    width: 76mm;
+    height: 101mm;
+    flex-shrink: 0;
+    box-shadow: none !important;
+    border: 1.5pt solid #ccc !important;
+    border-radius: 8pt !important;
   }
 
   /* Card front print styling */
-  .card-face {
-    box-shadow: none !important;
-    border: 1.5pt solid #F97316 !important;
-    border-radius: 8pt !important;
+  .card-front {
+    border-color: #F97316 !important;
+  }
+  .card-back {
+    border-color: #1E3A5F !important;
   }
 
   .card-front-top {
